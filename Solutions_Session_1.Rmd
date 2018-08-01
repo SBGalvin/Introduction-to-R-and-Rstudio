@@ -1,0 +1,626 @@
+---
+title: "Introduction to R and Rstudio"
+subtitle: "Session 1 solutions"
+author: "SB Galvin"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This notebook presents the solutions to exercises in Session 1
+
+
+# Section 0:
+## Comments `#`
+In general, comments are used to insert code annotations explaining what a line of code does (hence the term comment). The `#` character is also used to prevent a line of code from running, this is called "commenting out" code.
+In R the `#` comments out anything to the right of it, preventing that code from being run. Anything to the left of `#` will still run.
+*note* I have made liberal use of `#`, particularly around package installation, so you don't reinstall a package everytime you run a script.
+
+
+As you go through this notebook you will be asked to insert comments to label the code and explain what it does, do this by using the `#` octothorpe symbol. Placing `#` before a command will prevent that command from running.
+
+Store the values in the `x1` variable
+
+```{r}
+x1  <-  c(1, 2, 3, 4, 5)
+x1
+```
+
+This code will run
+```{r}
+median(x1) # this will run
+```
+
+This Code will not
+```{r}
+# mean(x1) # this will not run
+```
+
+Now remove the `#` at the start of line 52
+```{r}
+mean(x1) 
+```
+
+---
+
+
+ 
+# Section 1: 
+## Good Code/ Bad Code
+
+>"Programs must be written for people to read, and only incidentally for machines to execute." 
+>                                                         — Hal Abelson
+
+While crystal clear code is not as much of a big deal with a small script; it becomes an issue with a more dense script. Lack of clarity and variable naming conventions can lead to issues during computation and slow down the entire data analysis process.
+
+#### What makes the code below bad code?
+1. R is a case sensitive language, so the two variables below will both be stored in memory. This may cause typing errors later on, similar variable names are hard to differentiate.
+
+2. The assignment operator `=` here is not equally spaced between the object and function. This may affect readability.The `<-` or `<=` operators should be used for left assignment.
+
+3. The Spacing around the operators are not regular
+
+4. The code is not annotaed with a comment to explain what is going on.
+
+**Bad code:**
+```{r}
+xX= rnorm(10000,100, 15) 
+Xx =rnorm(10000, 37, 
+          1.6) 
+```
+
+
+**Good code:**
+```{r}
+iq.sim  <-  rnorm(10000, 100, 15) # generates 10k values, m=100, sd=15
+open.b5 <-  rnorm(10000, 37, 1.6) # generates 10k values, m=37, sd=1.6
+```
+
+A function for center scaling:
+```{r}
+#centering with 'scale()'
+center_scale <- function(x) {
+    scale(x, scale = FALSE) # scales x argument with mean 0
+}
+
+# apply center_scale()
+iq.norm <- center_scale(iq.sim) #norm scale the values
+ob5.norm <- center_scale(open.b5)  #norm scale the values
+```
+
+At a small scale bad code is passable. However, when you have to do something a bit more complex it makes it difficult to read.
+
+**Bad Code**:
+```{r}
+# Bad Code
+
+par(mfrow=c(3, 2)) 
+hist(iq.sim)
+abline(v=mean(iq.sim),col= 'red',lwd =2)
+hist(open.b5)
+abline(v=mean(open.b5), col = 'blue',lwd= 2)
+plot(iq.sim, open.b5, pch = 19, type = "o",
+     col=adjustcolor("black", alpha.f= .03))
+abline(lm(iq.sim~ open.b5))
+plot(iq.norm,ob5.norm, pch= 19, type ="o",col= adjustcolor("black", alpha.f =.03))
+abline(lm(iq.norm ~ ob5.norm))
+hist(iq.norm)
+abline(v=mean(iq.norm), col='red', lwd=2)
+hist(ob5.norm)
+abline(v =mean(iq.norm), col ='blue', lwd=2)
+```
+
+
+**Good Code:**
+```{r}
+# Good Code
+par(mfrow = c(3, 2)) # this creates a 3 x 2 plot matrix
+
+# hist of raw data
+    ## Top Left
+hist(iq.sim)
+abline(v = mean(iq.sim), col = 'red', lwd = 2) # Mean line
+    ## Top Right
+hist(open.b5)
+abline(v = mean(open.b5), col = 'blue', lwd = 2) # Mean line
+
+# Scatterplot of Raw Data
+    ## Middle Left
+plot(iq.sim, open.b5, pch = 19, type = "o",
+     col = adjustcolor("black", alpha.f = .03))
+abline(lm(iq.sim ~ open.b5))
+
+# Scatterplot of Scaled data
+    ## Middle Right
+plot(iq.norm, ob5.norm, pch = 19, type = "o",
+     col = adjustcolor("black", alpha.f = .03))
+abline(lm(iq.norm ~ ob5.norm))
+# hist of normed data
+    ## Bottom Left
+hist(iq.norm)
+abline(v = mean(iq.norm), col = 'red', lwd = 2) # Mean line
+    ## Bottom Right
+hist(ob5.norm)
+abline(v = mean(iq.norm), col = 'blue', lwd = 2) # Mean line
+```
+
+
+The following code generates a vector named xmple containing 10000 chisquare distributed random values. 
+```{r}
+BadCode  <-                                 rchisq(10000, 
+                                                   10) 
+
+hist(BadCode) 
+abline(v=mean(BadCode), col = 'blue', 
+       lwd = 2) 
+abline(v = median(BadCode), 
+       col = 'red', 
+       lwd=2) 
+```
+Now explain why this is bad code. How readable is it? What should you do to change it?
+
+Now rearrange each function call so that they are on a single line. Next annotate each line of code and explain what it does. 
+```{r}
+GoodCode  <-  rchisq(10000, 10) # Randomly Generate 10k chisquare distributed values, with df=10
+hist(GoodCode) # Plots histogram
+abline(v = mean(GoodCode), col = 'blue', lwd = 2) # Plots Mean line
+abline(v = median(GoodCode), col = 'red', lwd = 2) # Plots Median line
+```
+
+Now that you have a rough idea of what looks **bad** and what looks **good**, we can start playing around with R. 
+
+# Section 1 
+## Arithmetic, Operators, and Assignment
+This section covers arithmetic, Operators and Assignment, operators are shown within each context, rather than by themselves.
+
+###Arithmetic
+R functions as a calculator:
+```{r Sect 1.1}
+3 + 4
+```
+
+Subtraction:
+```{r}
+1372 - 21
+```
+
+
+Multiplication:
+```{r Sect 1.2}
+# Multiplication
+5 * 5
+```
+
+Division:
+```{r Sect 1.3}
+# Division
+21 / 3
+```
+
+### Raise to the power
+```{r Sect 1.4}
+# Power
+2 ^ 3
+```
+
+
+square root function divided by 2:
+```{r Sect 1.8}
+# Square Root
+sqrt(7056)/2
+```
+
+`pi` is already contained as a named value
+```{r Sect 1.9}
+# pi
+sqrt(pi)
+```
+
+### **BOMDAS**/**PEMDAS**
+R (like most/all) languages, performs a calculation using the order of operations:
+```{r Sect 1.5}
+# PEMDAS
+10 *(12-4) + 3/4^3
+```
+
+```{r Sect 1.6}
+# PEMDAS 2
+10*8 + 3/64
+```
+If you don't use Parentheses, R will automatically compute according to PEMDAS
+```{r}
+# Pemdas 3
+10 * 12 - 4 + 3 / 4 ^ 3
+```
+
+But R can also do the same operations using algebra. If we replace the numercial values in the formula with our new objects, then we should be able to get the same output.
+
+```{r Sect 1.10}
+# values
+a  <-  10
+b  <-  12 
+c  <-  4
+d  <-  3
+```
+
+We can add the two values together (add d and c)
+```{r Sect 1.11}
+d + c
+```
+we can store the result of our arithmetic operation in a new object (create a new object named e, adding d and c):
+```{r Sect 1.12}
+e  <-  d + c
+```
+
+and then print that object by calling it (typing and then Running the code):
+```{r Sect 1.13}
+e # Note the [1] before 7 refers to an order positions
+```
+
+
+How would you write the formula above to get the same answer:`80.04688`?
+
+- Store output in a value labelled x.out
+- retype `x.out` on a new line to print it out
+
+Calculation
+```{r Sect 1.14}
+#10 *(12-4) + 3/4^3
+x.out  <-  a *(b - c) + d/c^d
+```
+
+Output
+```{r}
+x.out
+```
+
+Eureka!
+
+# Section 2
+### Concatenation and Indexing
+
+#### Concatenation
+The `c()` or "concatenate" function combines values into a vector, if we want to extract a specific value from a 1d vector, then we can use the index call at the end of a vector name `[1]` to call the first element. R index numbers start from `1`, other langauges, e.g. Python starts from `0`. 
+
+If we had a dataframe we could use a 2d index `[1,1]` to call the value in the first row and first column
+
+Now using the `c()` function we can combine two of our values from earlier:
+```{r Sect 1.15}
+c(a, b)
+```
+
+These values can be stored as a list  inside another object. Lets store our a, b, c and d values inside a vector named `my_vec` using the `c()` function and the `<-` assignment operator
+```{r Sect 1.16}
+my_vec  <- c(a, b, c, d) # Stores values in vector my_vec
+```
+
+Now print out `my_vec`
+```{r Sect 1.17}
+my_vec
+```
+
+R also performs vectorised operations, so instead of having to multiple the individual vlaues in my_vec, we can simple multiply the vector by 2:
+```{r Sect 1.18}
+my_vec2 <- my_vec * 2 # new vector, doubling the old vector
+my_vec2
+```
+*Notes:
+
+
+Now create two new vectors with just numbers; 
+
+- `f_vec` with 2,4,5 and 3,.
+- `g_vec` with 6, 7, 1, and 2.
+
+```{r Sect 1.19}
+f_vec  <-  c(2, 4, 5, 3)
+
+g_vec  <-  c(6, 7, 1, 2)
+```
+
+
+Now multiply my_vec2 by the f and g vec:
+```{r Sect 1.20}
+# f_vec
+my_vec2 * f_vec
+```
+
+```{r Sect 1.21}
+my_vec2 * g_vec
+```
+
+This may seem trivial but in order for vectorised operations to be performed, R needs to have equivalent n of values in each vector.
+
+Create a new vector named no_vec, with 3 numbers and multiply it by my_vec2:
+```{r Sect 1.22}
+no_vec  <- c(1, 2, 3)
+
+my_vec2 * no_vec
+```
+
+In cases where you need only complete data, the missing value could be replaced, and excluded in later analyses.
+So now add `NaN` as the 4th value in `no_vec2` using indexing
+```{r}
+no_vec2  <-  no_vec
+no_vec2[4] <- NaN
+my_vec2 * no_vec2
+```
+`NaN` stands for Not a Number
+So there you have it we can do pairwise multiplications between corresponding vectors
+
+#### Indexing
+Index values are location identifiers for values stored inside an object.
+Indexes in R start from 1, in other langauge, index numbers start from 0 (Python). 
+Indexing can be used to identify a value stored in a list object by using a number stored in square brackets at the end of a list object `listobject[2]`
+
+If I were to attempt to extract the number 5 from the f_vec list:
+```{r}
+f_vec[3]
+```
+
+I can also extract a sequence or "slice" from an object by using the colon `:` inside the square brackets:
+```{r}
+f_vec[1:2]
+```
+
+If I wanted to extract the 1st and 4th number from `f_vec` I can input them directly into the square brackets inside the concatenate function `c()`:
+```{r}
+f_vec[c(1,4)]
+```
+
+
+Rather than manually type all of the numbers; if I were to extract every second number I could also use the `seq()` function to create a list of numbers create a list using the concatentate function `c()` of location numbers, and then pass this into the square brackets:
+```{r}
+my_num  <-  seq(1,4, by=2)
+f_vec[my_num]
+```
+
+Subsets of the elements of a vector may be selected by appending to the name of the vector an
+index vector
+in square brackets
+
+
+#### Indexing with matrices, arrays and dataframes
+If I wanted to extract a specific value from a rectangular object, I would use the index number as if they were Cartesian coordinates:
+
+
+#### Exercise
+
+```{r}
+mp <- c("s","u","p","e","r",
+        "c","a","l","i",
+        "f","r","a","g","i","l","i","s","t","i","c",
+        "e","x","p","i","a","l","i","d","o","c","i","o","u", "s")
+
+mp # whats in the vector
+```
+
+
+Now use a vector index to produce a vector with the list mp1 staple, and mp2 atrocious
+```{r}
+mp1 <- c(1,18,12,23,8,4)
+mp[mp1]
+```
+
+```{r}
+mp2  <- c(7,18, 5, 29, 30, 31, 32, 33, 34)
+mp[mp2]
+```
+
+Are there any other words you can spot?
+
+```{r}
+
+```
+
+---
+# Section 3 
+## Data frames and Summaries
+Dataframes are the main object you will use, there are other kinds, lists, arrays, matrices. But for now, we will focus purely on dataframes, and functions that we can perform with them. 
+
+### Dataframes
+A dataframe is data with a rectangular structure, Columns are variables, and rows are observations [people]. When you import data into R, it will be stored as data frame.
+
+Now that we know we can combine values together, we want to know how to turn them into a dataframe. We can take our my_vec values and combine them into a dataframe using the `data.frame()` function and asssign that to an object:
+
+```{r Sect 2.1}
+my_df  <- data.frame(my_vec, my_vec2)
+my_df
+```
+
+The output shows the dataframe, a full view will show up to 1000 rows of data, and all columns. The `dbl` notation just means double precision floating point numbers. 
+
+### Indexing a data frame
+If we wanted to extract number 4, we can use indexing `[x,y]` with x as the row number and y as the column nmber
+```{r}
+my_df[3,1]
+```
+
+We can index a specific column:
+```{r}
+my_df[,1]
+```
+
+Or we can index a specific row:
+```{r}
+my_df[1,]
+```
+We can also use the column names inside square brackets to extract a column:
+```{r}
+my_df[['my_vec']]
+```
+
+Or we can use the `$` sign to extract a column
+```{r}
+my_df$my_vec
+```
+
+
+Now if we want to add a new variable column to the data set we can use the `$` operator attached to the data frame name, when you type this first you will see the autocomplete is suggesting to use the other columns in the df. Don't do this for an assignment operation, just give this a new name, eg my_vec3
+```{r Sect 2.2}
+my_df$my_vec3  <- c(10, 11.5, 7, 13)
+my_df
+```
+
+The output shows that we now have three columns, so lets add a categorical variable, hotdog, nothotdog
+
+```{r Sect 2.3}
+my_df$Hotdog  <-  c("hotdog", "nothotdog", "hotdog", "nothotdog")
+my_df
+```
+When we look at the Hotdog column we see that it is a character variable, instead we want to relabel it as to be a factor variable. If we look back through the slides, what function should we use?
+
+```{r Sect 2.4}
+my_df$Hotdog <- as.factor(my_df$Hotdog)
+my_df
+```
+
+There we go, now we have a factor variable in our data set. lets include an ID variable.
+
+```{r Sect 2.5}
+my_df$ID  <- seq(1:nrow(my_df))
+my_df
+```
+
+If we want to reorder the data frame so the ID variable is first, we can use a list inside of a square bracket and assign this to a new object
+```{r}
+my_df2 <- my_df[c("ID", "my_vec", "my_vec2", "my_vec3", "Hotdog")] 
+
+my_df2
+```
+
+Thats all well and good but, lets say we want to work on some real data. We can use R's import functions to load a `.csv` file
+Now we load in a dataset using the `read.csv()` function and assign that to `data.e1`.
+Because our data set is inside the "Data" folder in the project, we must include that location in the argument so R knows where to look this can be done using forward slash `/`
+```{r Sect 2.6}
+data.e1  <-  read.csv("Data/e1_s.csv")
+data.e1
+```
+
+We can check out the structure of the `data.e1` using `str()`
+```{r}
+str(data.e1)
+```
+
+Clearly this is a large data frame. So if we only had one or two variables that we were interested in, we could just select those columns using list inside square brackets.
+
+```{r}
+data.e1.b  <- data.e1[c("female", "pright", "dtnoword1")]
+data.e1.b
+```
+
+Lets say we wanted to get the mean and standard deviaton of the `pright variable`:
+Standard Deviation
+```{r}
+# sd ##  Lots of missing data so use na.rm = TRUE as arg for sd()
+sd(data.e1.b$pright, na.rm=TRUE)
+```
+Doing that all the time is quite a bit of effort, so in exercise 2 we will use packages to make the job a bit easier.
+
+Summary Tools can give us a quick text summary of the data. In an R script, placing the command in the `View()` function can give us a nice summary visual `View(dfSummary(data.e1.b))`
+```{r}
+# Only install this once,
+# remove the # and then click to run
+#install.packages("summarytools")
+# once installed type the # at the start of the line
+```
+
+```{r echo=TRUE}
+library(summarytools)
+print(dfSummary(data.e1.b, style = 'grid'), method = 'render') # text output
+```
+
+```{r}
+#view(dfSummary(data.e1.b)) #  This will show in your viewer pane
+```
+
+If we wanted to save our summary output to a .csv file for a table for a report we could generate a summary using the `psych` package:
+```{r}
+# Only install this once,
+# remove the # and then click to run
+#install.packages("psych")
+# once installed type the # at the start of the line
+```
+
+
+```{r}
+library(psych)
+describe(data.e1.b)
+```
+
+
+we could also use the describeBy function to take a look at differenes between female==1 and female==0
+first use the help funciton 
+```{r}
+describeBy(data.e1.b,data.e1.b$female) 
+```
+
+Now we can 
+```{r}
+describeBy(data.e1.b,data.e1.b$female, mat=TRUE) ->> output1
+```
+
+Using the `write.csv()` function we can save our output to a .csv file for later use
+```{r}
+#write.csv(output1, "Data/Output1.csv")
+```
+
+
+# Practical 
+
+Import the "big5.csv" file from the data folder and store it in an object called big5
+
+```{r}
+big5  <- read.csv("Data/b5.csv")
+big5
+```
+
+
+Check out the structure:
+```{r}
+str(big5)
+```
+
+
+Extract the gender and E subscale data and store it in an object named big5_2:
+```{r}
+big5_2  <- big5[c("gender", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9", "E10")]
+big5_2
+```
+
+
+ensure you recode the gender variable as a factor
+```{r}
+big5_2$gender  <- factor(big5_2$gender)
+```
+
+
+Now summarise the data frame using summary tools
+```{r}
+print(dfSummary(big5_2, style = 'grid'), method = 'render') # produces text summary in console
+```
+
+If you are using an R script you can yse the following code to see the summary in the viewer window
+```{r}
+#view(dfSummary(big5_2))
+```
+
+summarise the data by gender using the psych package
+```{r}
+describeBy(big5_2, big5_2$gender)
+```
+
+
+Assign the output to an object
+```{r}
+#describeBy(big5_2[-["gender"]], big5_2$gender, mat=TRUE) ->> b5.output
+#b5.output
+```
+
+Save the output in .csv format to the Data folder. 
+```{r}
+#write.csv(b5.output, "Data/b5_output.csv")
+```
+
