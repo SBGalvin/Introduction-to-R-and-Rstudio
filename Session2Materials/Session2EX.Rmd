@@ -1,0 +1,414 @@
+---
+title: "Introduction to R and Rstudio"
+subtitle: "Session2: T-tests and Correlations"
+author: "SB Galvin"
+output:html_document
+
+---
+
+
+
+First I am going to set some options:
+```{r}
+options(scipen = 999) # Disable scientific notation
+```
+
+# T-Tests
+## Section 1 Importing or Reading Data
+
+In this case we are going to manually input some data to explain the difference between wide format and long format data
+
+### Wide Formated data:
+In wide formatted datasets, one of the variables that constitutes the unit of analysis is mixed with a variable that holds values.In the case of a t test we are interested in differences between two groups, the MALE or FEMALE variables are combined with the response variable 
+
+```{r}
+df.wide   <- data.frame(Male = c(01,
+                                 02, 02, 
+                                 03, 03, 03, 
+                                 04, 04, 04, 04,
+                                 05, 05, 05, 05, 05, 
+                                 06, 06, 06, 06, 06, 06,
+                                 07, 07, 07, 07, 07, 07, 07, 
+                                 08, 08, 08, 08, 08, 08,
+                                 09, 09, 09, 09, 09,
+                                 10, 10, 10, 10, 
+                                 11, 11, 11, 
+                                 12, 12,
+                                 13),
+                        Female = c(04, 
+                                   05, 05,
+                                   06, 06, 06, 
+                                   07, 07, 07, 07, 
+                                   08, 08, 08, 08, 08,
+                                   09, 09, 09, 09, 09, 09, 
+                                   10, 10, 10, 10, 10, 10, 10,
+                                   11, 11, 11, 11, 11, 11, 
+                                   12, 12, 12, 12, 12,
+                                   13, 13, 13, 13, 
+                                   14, 14, 14, 
+                                   15, 15, 
+                                   16))
+df.wide
+```
+
+---
+###Long Formated data
+In long format each row is an observation, and each column is a variable: in this case we have a Response Variable and a condition (SEX) variable:
+```{r}
+# Create long format data frame
+df.long   <- data.frame(Response  = c(01,
+                                      02, 02, 
+                                      03, 03, 03, 
+                                      04, 04, 04, 04,
+                                      05, 05, 05, 05, 05, 
+                                      06, 06, 06, 06, 06, 06,
+                                      07, 07, 07, 07, 07, 07, 07, 
+                                      08, 08, 08, 08, 08, 08,
+                                      09, 09, 09, 09, 09,
+                                      10, 10, 10, 10, 
+                                      11, 11, 11, 
+                                      12, 12,
+                                      13,
+                                      04, 
+                                      05, 05,
+                                      06, 06, 06, 
+                                      07, 07, 07, 07, 
+                                      08, 08, 08, 08, 08,
+                                      09, 09, 09, 09, 09, 09, 
+                                      10, 10, 10, 10, 10, 10, 10,
+                                      11, 11, 11, 11, 11, 11, 
+                                      12, 12, 12, 12, 12,
+                                      13, 13, 13, 13, 
+                                      14, 14, 14, 
+                                      15, 15, 
+                                      16),
+                        Condition = c("M",
+                                      "M", "M",
+                                      "M", "M", "M",
+                                      "M", "M", "M", "M",
+                                      "M", "M", "M", "M", "M",
+                                      "M", "M", "M", "M", "M", "M",
+                                      "M", "M", "M", "M", "M", "M", "M",
+                                      "M", "M", "M", "M", "M", "M",
+                                      "M", "M", "M", "M", "M",
+                                      "M", "M", "M", "M",
+                                      "M", "M", "M",
+                                      "M", "M",
+                                      "M",
+                                      "F",
+                                      "F", "F",
+                                      "F", "F", "F",
+                                      "F", "F", "F", "F",
+                                      "F", "F", "F", "F", "F",
+                                      "F", "F", "F", "F", "F", "F",
+                                      "F", "F", "F", "F", "F", "F", "F",
+                                      "F", "F", "F", "F", "F", "F",
+                                      "F", "F", "F", "F", "F",
+                                      "F", "F", "F", "F",
+                                      "F", "F", "F",
+                                      "F", "F",
+                                      "F"))
+df.long
+```
+If we were to read in a .csv file we could use the `read.csv()` function.
+
+##Section2: Summarise data
+Now that we have our data loaded, we can summarise it:
+
+###R base Summary
+We can use the `summarise()` 
+
+For long format, we can use `summary()`in conjunction with `by()` to get a quick summary of the data. This tells R to summarise the Dataframe by category membership of Condition variable
+```{r}
+# Long format
+# by() allows you to perform functions divided by a categorical variable
+by(df.long,                                      # Tell R where the data is
+   df.long$Condition,                            # Tell R what/where the category is
+   summary)                                      # Which function you are applying 
+```
+
+Wide format data frame. Summary, summarises all columns in a wide data frame
+```{r}
+# Wide Format
+summary(df.wide)
+```
+
+###Summary with Psych Package
+
+
+###Summary with summarytools package
+```{r, results = 'asis'}
+library(summarytools)
+dfSummary(df.long)
+dfS
+```
+
+
+##Section 3: Visual Summaries
+
+For df.long only
+
+For both plot summaries I have included the method for saving as a .pdf file, this is commented out to prevent you from writing and overwriting.
+The function `pdf()` opens the save call, the last line in the chunk `dev.off()` closes the save call by turning off the graphic device in use
+
+If you wanted to visualise each plot by its self you could copy the code for that plot into another code chunk or R script
+```{r}
+#pdf("Session2Materials/PlotsS2/S2_Exercises_Panel_Plot.pdf")
+
+# This sets the image parameters, 2 rows, 2 columns
+par(mfrow=c(2,2))                               
+
+# Histogram of All responses
+hist(df.long$Response,                            # Select variable
+     main="Histogram : All Response",             # Set main title
+     xlab="Response Variable",                    # Set x axis title
+     col = "white",                               # Set Colour
+     border = "black"                            # Set bar edge colour
+)
+
+# Box plot comparing responses
+boxplot(formula = Response ~ Condition,          # Select Y and X variables
+        data = df.long,                          # Tell R to use this data 
+        main = "Boxplot : Condition x Response", # Set the main title
+        col = c("chocolate", "darkmagenta"))     # Set colours
+
+# Histogram of Male responses
+hist(df.long$Response[df.long$Condition=="M"],    # Select variable
+     main="Histogram : Male Response",            # Set main title
+     xlab="Response Variable",                    # Set x axis title
+     col = "darkmagenta",                         # Set Colour
+     border = "white",                            # Set bar edge colour
+     breaks = 14                                  # Set n breaks
+)
+
+# Histogram of Female Responses
+hist(df.long$Response[df.long$Condition=="F"],    # Select variable
+     main="Histogram : Female Response",          # Select main title
+     xlab="Response Variable",                    # Set x axis title
+     col="chocolate",                             # Set Colour
+     border="white",                              # Set bar edge colour
+     breaks = 14
+)
+
+par(mfrow=c(1,1))                                 # This returns the image parameters to normal
+#dev.off()                                         # This closes the graphics device for saving
+```
+
+
+All data appear to be normally distributed. However, we should really check for normality and equal variances before moving on to a t-test
+
+##Section 3: Assumption testing:
+### Normality
+The t-test assumes a normal distribution. Fortunately we can test this fairly quickly using the `shapiro.test()` function. 
+
+```{r}
+shapiro.test(df.long$Response)
+```
+
+```{r}
+shapiro.test(df.long$Response[df.long$Condition=="M"])
+```
+
+```{r}
+shapiro.test(df.long$Response[df.long$Condition=="F"])
+```
+
+### Equality of variances
+```{r}
+var.test(Response ~ Condition, data = df.long)
+```
+
+```{r}
+bartlett.test(Response ~ Condition, data = df.long)
+```
+
+## Section 4 T-test
+```{r}
+# t-test
+t.test(Response ~ Condition, 
+       data = df.long,
+       var.equal=TRUE,
+       alternate="greater",
+       conf.level = .95)
+```
+
+### Effect size
+First we can install and load the `effzise` package
+```{r}
+#install.packages("effsize")
+library(effsize)
+```
+
+Now use the `cohen.d()` function from `effsize`:
+```{r}
+cohen.d(Response ~ Condition, data = df.long)
+```
+
+### Post-Hoc Power
+
+So heres a user defined function we can use to estimate our tests power
+ We need to extract the means and standard deviations from the summary phase of our workflow
+```{r}
+# Apply mean()
+by(df.long$Response,              # Tell R where the data is
+   df.long$Condition,             # Tell R what/where the category is
+   mean) ->> Mns                  # Which function you are applying # Save to output
+
+# Apply sd()
+by(df.long$Response,              # Tell R where the data is
+   df.long$Condition,             # Tell R what/where the category is
+   sd) ->> StDevs                 # Which function you are applying # Save to output
+
+# This will print out both the means and StDev
+c(Mns, StDevs)                    # Print Means First, StDev Second
+```
+
+Run this code chunk to use the t-test power function `t.power()`
+```{r}
+# t.power for equal variances between groups
+t.power = function(nsamp=c(10,10),nsim=1000,means=c(0,0),sds=c(1,1),var.equal=TRUE){
+    lower = qt(.025,df=sum(nsamp) - 2)
+    upper = qt(.975,df=sum(nsamp) - 2)
+    ts = replicate(nsim,
+       t.test(rnorm(nsamp[1],mean=means[1],sd=sds[1]),
+              rnorm(nsamp[2],mean=means[2],sd=sds[2]))$statistic)
+
+    sum(ts < lower | ts > upper) / nsim
+}
+
+```
+
+Now insert the n, means and sf for `Condition=="F`, and `Condition=="M`
+```{r}
+t.power(nsamp=c(49,49),             # N in each sample group
+        means=c(10,7),              # Means for each sample group
+        sds=c(2.857738, 2.857738))  # StDev for each sample group
+```
+0.998 % Power, not too bad for a makey uppy data set
+
+If the group variances are unequal, we can set `var.equal=FALSE` in the function call:
+```{r}
+t.power(nsamp=c(49,49),             # N in each sample group
+        means=c(10,7),              # Means for each sample group
+        var.equal = FALSE)         # Variances Not Equal
+```
+
+Now we can see how well power would recover under this effect size with differig samples. As we have **HIGH** power at 99.8%, and an effect size of **LARGE** 1.05, we can start with a sample size smaller than our current one in the `samps` object:
+```{r}
+samps = c(10, 15, 20, 30, 100,200,300,400,500)
+res = sapply(samps,function(n)t.power(means=c(10,7),nsamp=c(n,n), sds=c(2.586, 2.586)))
+names(res) = samps
+res
+```
+
+So if the effect is true than we may be able to recover it with sample size of 15
+
+We can also use the pwr package to take into account effect size
+```{r}
+#install.packages("pwr")
+library(pwr)
+```
+
+Now we can use the pwr.t.test() function. use the helper function to see what arguments the function takes and then fill it 
+```{r}
+pwr.t.test(n =49, d=1.05, sig.level = 0.05, type="two.sample", alternative = "greater" )
+```
+
+NOTES FOR PRESENTER:
+Power Function
+https://statistics.berkeley.edu/computing/r-t-tests
+
+# Correlation
+Correlations are a little bit easier to perform
+
+Correlation functions are very rapid in R
+```{r}
+NC  <- read.csv("Session2Materials/DataS2/NicCage.csv", fileEncoding="UTF-8-BOM")
+NC$Year
+```
+```{r}
+# Histogram of Nic Cage Films
+pdf("Session2Materials/PlotsS2/S2_Exercises_HistNicCage.pdf")
+hist(NC$Nicholas_Cage,    # Select variable
+     main="Histogram : Nic Cage Films",           # Set main title
+     xlab="Number of Films",                      # Set x axis title
+     col = "tomato",                              # Set Colour
+     border = "white",                            # Set bar edge colour
+     breaks = 14                                  # Set n breaks
+)
+dev.off
+```
+
+```{r}
+# Histogram of Drownings in the US
+pdf("Session2Materials/PlotsS2/S2_Exercises_histDrown.pdf")
+hist(NC$Drownings,    # Select variable
+     main="Histogram : Drownings (US)",           # Set main title
+     xlab="Drownings",                            # Set x axis title
+     col = "dodgerblue2",                              # Set Colour
+     border = "white",                            # Set bar edge colour
+     breaks = 14                                  # Set n breaks
+)
+dev.off()
+```
+
+```{r}
+plot(NC$Nicholas_Cage, NC$Drownings,
+     pch = 21, cex=2, col="grey10", bg="tomato")
+
+```
+
+```{r}
+plot(NC$Year, NC$Nicholas_Cage,
+     pch = 21, cex=2, col="grey10", bg="tomato",                    # Set point colours and values
+     main = "Number of Nicholas Cage Films Released in Each Year",  # Main Title
+     xlab = "Year(1999: 2009)",                                     # X axis label
+     ylab = "Number of Nicholas Cage Films")                        # Y axis label
+par(new = T)                                                        # Use to Add on the lines
+lines(NC$Year, NC$Nicholas_Cage)                                    # Add lines
+```
+```{r}
+plot(NC$Year, NC$Drownings,
+     pch = 21, cex=2, col="grey10", bg="dodgerblue2",             # Set point colours and values
+     main = "Number of Deaths by Drowning in the United States",  # Main Title
+     xlab = "Year(1999: 2009)",                                   # X axis label
+     ylab = "Number of Drownings (US)")                           # Y axis label
+par(new = TRUE)                                                   # Use to Add on the lines
+lines(NC$Year, NC$Drownings)                                      # Add lines
+```
+We can also plot all of the above together
+```{r}
+#pdf("Session2Materials/PlotsS2/S2_Exercises_NicCage.pdf")
+with(NC,plot(Year, Nicholas_Cage,
+     pch = 21, cex=2, col="grey10", bg="tomato",                    # Set point colours and values
+     main = "Number of Nicholas Cage Films Released in Each Year",  # Main Title
+     xlab = "Year(1999: 2009)",                                     # X axis label
+     ylab = "Number of Nicholas Cage Films")                       # Y axis label
+     )                                
+par(new=T)
+lines(NC$Year, NC$Nicholas_Cage)                                    # Add lines                                     
+par(new = T)
+with(NC, plot(Year, Drownings,
+              pch = 21, cex=2, col="grey10", bg="dodgerblue2",
+               axes=F, xlab=NA, ylab=NA),
+     lines(Year, Drownings))
+
+legend("topleft",legend=c("Nicholas Cage Films", "Drownings"),
+       lty=c(1,0), pch=c(21, 21),col=c("tomato", "dodgerblue2"))
+axis(side = 4)
+mtext(side = 4, line = 3, 'Number of Drownings (US)')
+par(new = TRUE)                                                   # Use to Add on the lines
+lines(NC$Year, NC$Drownings) 
+#dev.off()
+
+```
+
+```{r}
+cor.test(NC$Nicholas_Cage, NC$Drownings)
+```
+
+```{r}
+cor.test(NC$Nicholas_Cage, NC$Drownings)->CORRR
+c("Var Explained: ",(CORRR$estimate ^2 *100))
+```
+
